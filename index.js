@@ -1,13 +1,13 @@
 const express = require('express')
 const { nanoid } = require("nanoid");
 const app = express()
-const port = 3000
+const port = 4000
 const morgan = require('morgan');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const secret = 'Eric Steinke'
 
-// mongoose.connect('mongodb://localhost/test', {useNewUrlParser: true, useUnifiedTopology: true});
+// mongoose.connect('mongodb://localhost:27017/test', {useNewUrlParser: true, useUnifiedTopology: true});
 
 const db = {
     users: [
@@ -53,9 +53,9 @@ app.use(function (req, res, next) {
         });
         
         //Get a specific user
-        app.get('/user/:id', (req, res) => {
+        app.get('/user/:username', (req, res) => {
             
-            oneUser = db.users.find((user) => user.id === req.params.id)
+            oneUser = db.users.find((user) => user.username === req.params.username)
             if (!oneUser) {
                 res.status(404).send("user id doesn't exist")
             }
@@ -120,8 +120,8 @@ app.use(function (req, res, next) {
         
         //Patch todo.completed
         app.patch("/user/:userId/todo/:todoId/completed", (req, res) => {
-            let user = db.users.find((u) => u.id === parseInt(req.params.userId))
-            let todo = user.todos.find((todo) => todo.id === parseInt(req.params.todoId))
+            let user = db.users.find((u) => u.id === (req.params.userId))
+            let todo = user.todos.find((todo) => todo.id === (req.params.todoId))
             if(!user) {
                 res.status(400).json({
                     status: "fail",
@@ -139,8 +139,8 @@ app.use(function (req, res, next) {
         
         //patch a todo title
         app.patch("/user/:userId/todo/:todoId", (req, res) => {
-            let user = db.users.find((u) => u.id === parseInt(req.params.userId))
-            let todo = user.todos.find((todo) => todo.id === parseInt(req.params.todoId))
+            let user = db.users.find((u) => u.id === (req.params.userId))
+            let todo = user.todos.find((todo) => todo.id === (req.params.todoId))
             if(!user) {
                 res.status(400).json({
                     status: "fail",
@@ -156,11 +156,11 @@ app.use(function (req, res, next) {
             })
         })
         ////////////////////////////////////////////////////////////////////
-        ////////////////////User Auth and User endpoints///////////////////////
+        ////////////////////User Auth and User endpoints////////////////////
         ////////////////////////////////////////////////////////////////////
         
         //Login a User. Returns a token for the user. 
-        app.post('/users/login', (req, res) => {
+        app.post('/users/auth/login', (req, res) => {
             const {username, password} = req.body
             let loginUser = db.users.find((u) =>  u.username === username)
                 
@@ -180,7 +180,8 @@ app.use(function (req, res, next) {
             }
         })
         
-        app.post('/users/registration', (req, res) => {
+        //registration
+        app.post('/users', (req, res) => {
             // const postUser = db.users.find((user) => user.id === parseInt(req.params.id))
             if (!req.body.username || !req.body.password) {
                 res.status(400).json({
